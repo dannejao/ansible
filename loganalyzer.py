@@ -1,4 +1,3 @@
-# Daniel Ekholm daniel.ekholm@edu.edugrade.se
 import sys
 def load(filepath, action):
     file = filepath[1]
