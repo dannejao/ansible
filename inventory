@@ -1,4 +1,9 @@
-192.168.1.39
-192.168.1.213
-192.168.1.130
-192.168.1.178
+# ubuntu hosts
+192.168.1.39 apache_package=apache2 php_package=libapache2-mod-php
+192.168.1.213 apache_package=apache2 php_package=libapache2-mod-php
+192.168.1.130 apache_package=apache2 php_package=libapache2-mod-php
+
+# centos hosts
+192.168.1.178 apache_package=httpd php_package=php
+
+# declare variable for each server in inventory for use later in playbooks

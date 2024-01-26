@@ -4,41 +4,17 @@
   become: true
   tasks:
 
-# use when ansible_distribution "Ubuntu" and apt.
-  - name: update repository index ubuntu apt
-    apt:
+# variables declared inside inventory for each OS
+
+  - name: install apache and php package, and update_cache.
+    package: # istället för apt och dnf
+      name:
+        - "{{ apache_package }}" # detta är en variable
+        - "{{ php_package }}"  # detta är en variable
+      state: latest
       update_cache: yes
-    when: ansible_distribution == "Ubuntu"
-
-  - name: install apache2 package
-    apt:
-      name: apache2
-      state: latest
-    when: ansible_distribution == "Ubuntu"
-
-  - name: add php support for apache
-    apt:
-      name: libapache2-mod-php
-      state: latest
-    when: ansible_distribution == "Ubuntu"
 
 
-# CentOS tasks starts here, using dnf, and name httpd/php.
 
-  - name: update repository index centos dnf
-    dnf:
-      update_cache: yes
-    when: ansible_distribution == "CentOS"
 
-  - name: install apache2 package on centos
-    dnf:
-      name: httpd
-      state: latest
-    when: ansible_distribution == "CentOS"
-
-  - name: add php support for apache on centos
-    dnf:
-      name: php
-      state: latest
-    when: ansible_distribution == "CentOS"
 
