@@ -1,0 +1,86 @@
+---
+
+
+- hosts: all   # Kör play updates på alla hosts
+  become: true
+  pre_tasks:  # denna task körs alltid först innan andra plays, dvs uppdatera först sedan installera.
+
+
+
+  - name: install updates (CentOS) # installerar updates på CentOS (dnf)
+    dnf:
+      update_only: yes
+      update_cache: yes
+    when: ansible_distribution == "CentOS"
+
+  - name: install updates (Ubuntu) # installerar updates på ubuntu (apt)
+    apt:
+      upgrade: dist
+      update_cache: yes
+    when: ansible_distribution == "Ubuntu"
+
+
+
+# web_servers play
+- hosts: web_servers # kör denna play enbart på web_servers
+  become: true
+  tasks:
+
+
+  - name: install apache and php for Ubuntu servers # play för ubuntu
+    apt:
+      name:
+        - apache2
+        - libapache2-mod-php
+      state: latest
+      update_cache: yes
+    when: ansible_distribution == "Ubuntu"
+
+  - name: install apache and php for CentOS servers # play för CentOS
+    dnf:
+      name:
+        - httpd
+        - php
+      state: latest
+      update_cache: yes
+    when: ansible_distribution == "CentOS"
+
+
+
+# db_servers play
+- hosts: db_servers
+  become: true
+  tasks:
+
+
+  - name: install mariadb package (CentOS)
+    dnf:
+      name:
+        - mariadb
+      state: latest
+      update_cache: yes
+    when: ansible_distribution == "CentOS"
+
+  - name: install mariadb pachage (Ubuntu)
+    apt:
+      name:
+        - mariadb-server
+      state: latest
+    when: ansible_distribution == "Ubuntu"
+
+
+
+# file server play
+- hosts: file_servers
+  become: true
+  tasks:
+
+
+  - name: install for samba package for Ubuntu and CentOS 
+    package:
+      name:
+      - samba
+      state: latest
+      update_cache: yes
+
+

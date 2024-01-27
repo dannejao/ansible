@@ -1,13 +1,18 @@
-# ubuntu hosts
-# group [ubuntu]
-[ubuntu]
-192.168.1.39 apache_package=apache2 php_package=libapache2-mod-php
-192.168.1.213 apache_package=apache2 php_package=libapache2-mod-php
-192.168.1.130 apache_package=apache2 php_package=libapache2-mod-php
 
-# centos hosts
-# group [centos]
-[centos]
-192.168.1.178 apache_package=httpd php_package=php
+[web_servers]
+# ubuntu-1
+192.168.1.39 
+# centos-1
+192.168.1.178 
 
-# declare variable for each server in inventory for use later in playbooks
+[db_servers]
+# ubuntu-2
+192.168.1.213
+
+[file_servers]
+# ubuntu-3
+192.168.1.130
+
+
+
+
