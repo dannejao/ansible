@@ -23,6 +23,28 @@
 
 
 
+# använd ansible för att administrera din workstation
+- hosts: workstations # kör på workstations gruppen
+  become: true
+  tasks:
+
+  - name: install unzip
+    package: # kan använda package eftersom det packetet heter lika på dnf och apt
+      name: unzip
+
+
+  - name: install terraform # installera terraform på workstation för cloud tjänster
+    unarchive: # låter oss unzippa en extern fil
+      src: https://releases.hashicorp.com/terraform/0.12.28/terraform_0.12.28_linux_amd64.zip # Hämtar filen från della url
+      dest: /usr/local/bin # sparar filen här, vanligt ställe att lägga dem på.
+      remote_src: yes # filen hämtas remote
+      mode: 0755 # permission rwx-r-x-r-x
+      owner: root # root äger filen
+      group: root # root gruppen har tillgång till filen
+
+
+
+
 # web_servers play
 - hosts: web_servers # kör denna play enbart på web_servers
   become: true
