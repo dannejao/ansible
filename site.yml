@@ -8,12 +8,14 @@
 
 
   - name: install updates (CentOS) # installerar updates på CentOS (dnf)
+    tags: always # kör alltid
     dnf:
       update_only: yes
       update_cache: yes
     when: ansible_distribution == "CentOS"
 
   - name: install updates (Ubuntu) # installerar updates på ubuntu (apt)
+    tags: always # Kör alltid
     apt:
       upgrade: dist
       update_cache: yes
@@ -28,6 +30,7 @@
 
 
   - name: install apache and php for Ubuntu servers # play för ubuntu
+    tags: apache,apache2,ubuntu
     apt:
       name:
         - apache2
@@ -37,6 +40,7 @@
     when: ansible_distribution == "Ubuntu"
 
   - name: install apache and php for CentOS servers # play för CentOS
+    tags: apache,centos,httpd
     dnf:
       name:
         - httpd
@@ -54,6 +58,7 @@
 
 
   - name: install mariadb package (CentOS)
+    tags: centos,db,mariadb
     dnf:
       name:
         - mariadb
@@ -62,6 +67,7 @@
     when: ansible_distribution == "CentOS"
 
   - name: install mariadb pachage (Ubuntu)
+    tags: db,mariadb,ubuntu
     apt:
       name:
         - mariadb-server
@@ -76,7 +82,8 @@
   tasks:
 
 
-  - name: install for samba package for Ubuntu and CentOS 
+  - name: install for samba package for Ubuntu and CentOS
+    tags: samba,centos,ubuntu
     package:
       name:
       - samba
