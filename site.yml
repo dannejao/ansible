@@ -39,7 +39,7 @@
       update_cache: yes
     when: ansible_distribution == "Ubuntu"
 
-  - name: install apache and php for CentOS servers # play för CentOS
+  - name: install apache and php for CentOS servers # play för CentOS.
     tags: apache,centos,httpd
     dnf:
       name:
@@ -48,6 +48,15 @@
       state: latest
       update_cache: yes
     when: ansible_distribution == "CentOS"
+
+  - name: copy default html file for site
+    tags: apache,apache2,httpd # tags för att lättare targetta denna file copy.
+    copy: # använd module copy för att kopiera en fil till en server.
+      src: default_site.html # filen som ska kopieras. OBS man behöver ej ange directory files den ligger i.
+      dest: /var/www/html/index.html # var den ska hamna på servern vi kopierar till. OBS, filnamnet behöver inte vara lika. Detta blir filnamnet vår fil får efter att den kopierats över.
+      owner: root # vem som ska äga filen, skulle kunna vara www-user eller vilken apache user vi har.
+      group: root # gruppen som ska ha tillgång till filen.
+      mode: 0644  # rw-r--r--  rättigheter, owner-group-others.
 
 
 
