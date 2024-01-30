@@ -7,20 +7,31 @@
 
 
 
-  - name: install updates (CentOS) # installerar updates på CentOS (dnf)
+  - name: update repo cache (CentOS) # installerar updates på CentOS (dnf)
     tags: always # kör alltid
     dnf:
-      update_only: yes
       update_cache: yes
+    changed_when: false # ignorera update changes för cleaner output resultat
     when: ansible_distribution == "CentOS"
 
-  - name: install updates (Ubuntu) # installerar updates på ubuntu (apt)
+  - name: update repo cache (Ubuntu) # installerar updates på ubuntu (apt)
     tags: always # Kör alltid
     apt:
-      upgrade: dist
       update_cache: yes
+    changed_when: false
     when: ansible_distribution == "Ubuntu"
 
+# play för att adda user simone, lägga till ssh keys till simone, och sudoers fil.
+- hosts: all
+  become: true
+  tasks:
+
+
+  - name: add ssh key for simone
+    tags: always
+    authorized_key:
+      user: simone
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEFgHwvtLsseQd4jL7mw/cKysrb/jkTvzd1TGUmFsNoS ansible" 
 
 
 # använd ansible för att administrera din workstation
@@ -88,7 +99,7 @@
       regexp: '^ServerAdmin' # regex för att hitta raden som börjar på ServerAdmin
       line: ServerAdmin somebody@somewhere.net # ändra ovan rad att bli detta istället, ersätter root@localhost.com
     when: ansible_distribution == "CentOS"
-    register: httpd # låter ansible registrera state i en variable kallad httpd
+    register: httpd # låter ansible registrera state i en variable kallad httpd, får ej använda samma variable flera gånger.
 
 
   - name: restart httpd (CentOS)
