@@ -81,6 +81,27 @@
     when: ansible_distribution == "CentOS"
 
 
+  - name: change e-mail address for admin
+    tags: apache,centos,httpd
+    lineinfile: # ändra en rad i en fil
+      path: /etc/httpd/conf/httpd.conf
+      regexp: '^ServerAdmin' # regex för att hitta raden som börjar på ServerAdmin
+      line: ServerAdmin somebody@somewhere.net # ändra ovan rad att bli detta istället, ersätter root@localhost.com
+    when: ansible_distribution == "CentOS"
+    register: httpd # låter ansible registrera state i en variable kallad httpd
+
+
+  - name: restart httpd (CentOS)
+    tags: apache,centos,httpd
+    service:
+      name: httpd
+      state: restarted # ser till att state är restarted
+    when: httpd.changed # ska bara köras ifall httpd variabeln blivit ändrad
+
+
+
+
+
 
   - name: copy default html file for site
     tags: apache,apache2,httpd # tags för att lättare targetta denna file copy.
