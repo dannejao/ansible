@@ -71,6 +71,17 @@
       update_cache: yes
     when: ansible_distribution == "CentOS"
 
+# play för autostart/enable för centos service
+  - name: start httpd (CentOS)
+    tags: apache,centos,httpd
+    service:
+      name: httpd
+      state: started
+      enabled: yes # aktiver autostart
+    when: ansible_distribution == "CentOS"
+
+
+
   - name: copy default html file for site
     tags: apache,apache2,httpd # tags för att lättare targetta denna file copy.
     copy: # använd module copy för att kopiera en fil till en server.
