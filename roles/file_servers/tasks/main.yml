@@ -1,0 +1,8 @@
+# file server play
+ - name: install for samba package for Ubuntu and CentOS
+   tags: samba,centos,ubuntu
+   package:
+     name:
+     - samba
+     state: latest
+

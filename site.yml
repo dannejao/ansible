@@ -5,163 +5,52 @@
   become: true
   pre_tasks:  # denna task körs alltid först innan andra plays, dvs uppdatera först sedan installera.
 
-
-
-  - name: update repo cache (CentOS) # installerar updates på CentOS (dnf)
+  - name: update repo index (CentOS) # installerar updates på CentOS (dnf)
     tags: always # kör alltid
     dnf:
       update_cache: yes
     changed_when: false # ignorera update changes för cleaner output resultat
     when: ansible_distribution == "CentOS"
 
-  - name: update repo cache (Ubuntu) # installerar updates på ubuntu (apt)
+  - name: update repo index (Ubuntu) # installerar updates på ubuntu (apt)
     tags: always # Kör alltid
     apt:
       update_cache: yes
     changed_when: false
     when: ansible_distribution == "Ubuntu"
 
-# play för att adda user simone, lägga till ssh keys till simone, och sudoers fil.
-- hosts: all
+
+- hosts: all # kör base role på alla servrar
   become: true
-  tasks:
+  roles:
+    - base # körs på alla servrar i inventory.
 
-
-  - name: add ssh key for simone
-    tags: always
-    authorized_key:
-      user: simone
-      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEFgHwvtLsseQd4jL7mw/cKysrb/jkTvzd1TGUmFsNoS ansible" 
-
-
-# använd ansible för att administrera din workstation
-- hosts: workstations # kör på workstations gruppen
+- hosts: workstations # kör workstation role på workstation servrar
   become: true
-  tasks:
+  roles:
+    - workstations # namnet på rolen vi ska köra, kommer enbart utföras på workstation servrar.
 
-  - name: install unzip
-    package: # kan använda package eftersom det packetet heter lika på dnf och apt
-      name: unzip
-
-
-  - name: install terraform # installera terraform på workstation för cloud tjänster
-    unarchive: # låter oss unzippa en extern fil
-      src: https://releases.hashicorp.com/terraform/0.12.28/terraform_0.12.28_linux_amd64.zip # Hämtar filen från della url
-      dest: /usr/local/bin # sparar filen här, vanligt ställe att lägga dem på.
-      remote_src: yes # filen hämtas remote
-      mode: 0755 # permission rwx-r-x-r-x
-      owner: root # root äger filen
-      group: root # root gruppen har tillgång till filen
-
-
-
-
-# web_servers play
-- hosts: web_servers # kör denna play enbart på web_servers
+- hosts: web_servers
   become: true
-  tasks:
+  roles:
+    - web_servers # körs enbart på servrar som ligger i gruppen web_servers i inventory.
 
-
-  - name: install apache and php for Ubuntu servers # play för ubuntu
-    tags: apache,apache2,ubuntu
-    apt:
-      name:
-        - apache2
-        - libapache2-mod-php
-      state: latest
-      update_cache: yes
-    when: ansible_distribution == "Ubuntu"
-
-  - name: install apache and php for CentOS servers # play för CentOS.
-    tags: apache,centos,httpd
-    dnf:
-      name:
-        - httpd
-        - php
-      state: latest
-      update_cache: yes
-    when: ansible_distribution == "CentOS"
-
-# play för autostart/enable för centos service
-  - name: start httpd (CentOS)
-    tags: apache,centos,httpd
-    service:
-      name: httpd
-      state: started
-      enabled: yes # aktiver autostart
-    when: ansible_distribution == "CentOS"
-
-
-  - name: change e-mail address for admin
-    tags: apache,centos,httpd
-    lineinfile: # ändra en rad i en fil
-      path: /etc/httpd/conf/httpd.conf
-      regexp: '^ServerAdmin' # regex för att hitta raden som börjar på ServerAdmin
-      line: ServerAdmin somebody@somewhere.net # ändra ovan rad att bli detta istället, ersätter root@localhost.com
-    when: ansible_distribution == "CentOS"
-    register: httpd # låter ansible registrera state i en variable kallad httpd, får ej använda samma variable flera gånger.
-
-
-  - name: restart httpd (CentOS)
-    tags: apache,centos,httpd
-    service:
-      name: httpd
-      state: restarted # ser till att state är restarted
-    when: httpd.changed # ska bara köras ifall httpd variabeln blivit ändrad
-
-
-
-
-
-
-  - name: copy default html file for site
-    tags: apache,apache2,httpd # tags för att lättare targetta denna file copy.
-    copy: # använd module copy för att kopiera en fil till en server.
-      src: default_site.html # filen som ska kopieras. OBS man behöver ej ange directory files den ligger i.
-      dest: /var/www/html/index.html # var den ska hamna på servern vi kopierar till. OBS, filnamnet behöver inte vara lika. Detta blir filnamnet vår fil får efter att den kopierats över.
-      owner: root # vem som ska äga filen, skulle kunna vara www-user eller vilken apache user vi har.
-      group: root # gruppen som ska ha tillgång till filen.
-      mode: 0644  # rw-r--r--  rättigheter, owner-group-others.
-
-
-
-# db_servers play
 - hosts: db_servers
   become: true
-  tasks:
+  roles:
+    - db_servers
 
-
-  - name: install mariadb package (CentOS)
-    tags: centos,db,mariadb
-    dnf:
-      name:
-        - mariadb
-      state: latest
-      update_cache: yes
-    when: ansible_distribution == "CentOS"
-
-  - name: install mariadb pachage (Ubuntu)
-    tags: db,mariadb,ubuntu
-    apt:
-      name:
-        - mariadb-server
-      state: latest
-    when: ansible_distribution == "Ubuntu"
-
-
-
-# file server play
 - hosts: file_servers
   become: true
-  tasks:
+  roles:
+    - file_servers
 
 
-  - name: install for samba package for Ubuntu and CentOS
-    tags: samba,centos,ubuntu
-    package:
-      name:
-      - samba
-      state: latest
-      update_cache: yes
+
+
+
+
+
+
 
 
