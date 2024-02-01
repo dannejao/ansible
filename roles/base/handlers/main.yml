@@ -1,0 +1,5 @@
+- name: restart_sshd # måste vara samma som notify anropar
+  service: # service heter lika på ubunty/centos
+    name: sshd
+    state: restarted
+
