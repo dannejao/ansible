@@ -1,51 +1,31 @@
-- name: install apache and php for Ubuntu servers # play för ubuntu
-  tags: apache,apache2,ubuntu
-  apt:
+- name: install apache and php packages # play för både ubuntu och centos i samma.
+  tags: apache,httpd,php
+  package:
     name:
-      - apache2
-      - libapache2-mod-php
+      - "{{ apache_package_name }}" # variabel vi deklarerat i host_vars IP.yml filerna
+      - "{{ php_package_name }}" # variabel vi deklarerat i host_vars IP.yml filerna
     state: latest
-  when: ansible_distribution == "Ubuntu"
 
 
-- name: install apache and php for CentOS servers # play för CentOS.
-  tags: apache,centos,httpd
-  dnf:
-    name:
-      - httpd
-      - php
-    state: latest
-  when: ansible_distribution == "CentOS"
-
-
-- name: start httpd (CentOS)
-  tags: apache,centos,httpd
+- name: start and enable apache/httpd service # ubuntu autostartar apache vid install, men ej centos.
+  tags: apache,httpd
   service:
-    name: httpd
+    name: "{{ apache_service }}" # variabel vi deklarerat i host_vars IP.yml filerna
     state: started
     enabled: yes # aktiver autostart
-  when: ansible_distribution == "CentOS"
 
 
-- name: change e-mail address for admin
+- name: change e-mail address for admin # ändra en rad i httpd.conf och ersätt med något annat
   tags: apache,centos,httpd
   lineinfile: # ändra en rad i en fil
     path: /etc/httpd/conf/httpd.conf
     regexp: '^ServerAdmin' # regex för att hitta raden som börjar på ServerAdmin
-    line: ServerAdmin somebody@somewhere.net # ändra ovan rad att bli detta istället, ersätter root@localhost.com
+    line: ServerAdmin somebody@somewhere.com # ändra ovan rad att bli detta istället, ersätter root@localhost.com
   when: ansible_distribution == "CentOS"
-  register: httpd # låter ansible registrera state i en variable kallad httpd, får ej använda samma variable flera gånger.
+  notify: restart_apache # måste stämma överens med - name: restart_apache i /web_servers/handleres/main.yml
 
 
-- name: restart httpd (CentOS)
-  tags: apache,centos,httpd
-  service:
-    name: httpd
-    state: restarted # ser till att state är restarted
-  when: httpd.changed # ska bara köras ifall httpd variabeln blivit ändrad
-
-
-- name: copy default html file for site
+- name: copy default html file for site # kopiera default_site till index.html på alla web_servers
   tags: apache,apache2,httpd # tags för att lättare targetta denna file copy.
   copy: # använd module copy för att kopiera en fil till en server.
     src: default_site.html # filen som ska kopieras. OBS man behöver ej ange directory files den ligger i.

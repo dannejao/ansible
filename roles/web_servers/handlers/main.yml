@@ -1,0 +1,4 @@
+- name: restart_apache # ska vara samma not notify: restart_apache i web_servers main.yml
+  service:
+    name: "{{ apache_service }}"
+    state: restarted
