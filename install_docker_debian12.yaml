@@ -1,0 +1,57 @@
+- name: Installera Docker på Debian 12
+  hosts: all
+  become: yes
+  gather_facts: yes  # Laddar in systemfakta, t.ex. Debian-kodnamn
+  tasks:
+    - name: Uppdatera och installera nödvändiga paket
+      apt:
+        name:
+          - ca-certificates
+          - curl
+        state: present
+        update_cache: yes
+
+    - name: Skapa mapp för GPG-nycklar
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+
+    - name: Ladda ner Docker GPG-nyckel
+      get_url:
+        url: https://download.docker.com/linux/debian/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: '0644'
+
+    - name: Lägg till Docker repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian {{ ansible_facts['distribution_release'] }} stable"
+        state: present
+        filename: 'docker'
+        update_cache: yes
+
+    - name: Installera Docker och relaterade paket
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+
+    - name: Starta och aktivera Docker-tjänsten
+      systemd:
+        name: docker
+        enabled: yes
+        state: started
+
+    - name: Verifiera Docker-installationen med "hello-world"
+      command: docker run --rm hello-world
+      register: docker_test_result
+      changed_when: false
+      ignore_errors: yes  # Ignorera fel så att playbooken kan fortsätta även om testet misslyckas
+
+    - name: Visa resultatet av Docker-testet
+      debug:
+        msg: "{{ docker_test_result.stdout }}"
